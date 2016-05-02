@@ -337,6 +337,12 @@ mod tests {
         }
     }
 
+    custom_derive! {
+        #[derive(Rand, Debug)]
+        struct TestStruct5 {}
+    }
+
+
     #[test]
     fn struct_simple() {
         let t: TestStruct = random();
@@ -347,6 +353,8 @@ mod tests {
         println!("{:?}", u);
         let v: TestStruct4<TestStruct, TestStruct2> = random();
         println!("{:?}", v);
+        let w: TestStruct5 = random();
+        println!("{:?}", w);
     }
 
     custom_derive! {
