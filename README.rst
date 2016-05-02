@@ -4,7 +4,7 @@ derive(Rand)
 
 Please read the `API documentation here`__
 
-__ http://bluss.github.io/rand_derive/
+__ https://bluss.github.io/rand_derive/
 
 |build_status|_ |crates|_
 
