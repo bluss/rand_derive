@@ -104,9 +104,9 @@ macro_rules! Rand {
             $($_enum_tail:tt)*
         }
     ) => {
-        Rand!{ @inject_where
-            [$($tnames: ::rand::Rand,)* $($preds)*]
-            [impl<$($constr)*> ::rand::Rand for $name<$($params)*>]
+        Rand!{ @as_item
+            impl<$($constr)*> ::rand::Rand for $name<$($params)*>
+                where (): ::rand::Rand, $($tnames: ::rand::Rand,)* $($preds)*
             {
                 fn rand<R: ::rand::Rng>(_rng: &mut R) -> Self {
                     let variant = Rand!(
@@ -171,9 +171,9 @@ macro_rules! Rand {
             $($_struct_tail:tt)*
         }
     ) => {
-        Rand!{ @inject_where
-            [$($tnames: ::rand::Rand,)* $($preds)*]
-            [impl<$($constr)*> ::rand::Rand for $name<$($params)*>]
+        Rand!{ @as_item
+            impl<$($constr)*> ::rand::Rand for $name<$($params)*>
+                where (): ::rand::Rand, $($tnames: ::rand::Rand,)* $($preds)*
             {
                 fn rand<R: ::rand::Rng>(_rng: &mut R) -> Self {
                     Rand!{@struct $kind _rng $name $fields }
@@ -206,12 +206,6 @@ macro_rules! Rand {
     };
     // substitute
     (@sub $_input:tt $output:expr) => { $output };
-    (@inject_where [] [$($_impl:tt)*] $body:tt) => {
-        Rand!{@as_item $($_impl)* $body}
-    };
-    (@inject_where [$($clause:tt)*] [$($_impl:tt)*] $body:tt) => {
-        Rand!{@as_item $($_impl)* where $($clause)* $body}
-    };
     (@as_item $i:item) => { $i };
 }
 
