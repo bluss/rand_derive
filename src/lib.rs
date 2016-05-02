@@ -273,10 +273,18 @@ mod tests {
             C { },
         }
     }
+    custom_derive! {
+        #[derive(Rand, Debug)]
+        enum TestS2 {
+            A { },
+        }
+    }
     #[test]
     fn enum_structvar() {
         let t: TestS = random();
         println!("{:?}", t);
+        let s: TestS2 = random();
+        println!("{:?}", s);
     }
 
     custom_derive! {
