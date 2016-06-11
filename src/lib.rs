@@ -140,7 +140,7 @@ macro_rules! Rand {
     (@enum tuple $rng:ident $name:ident $vname:ident
      [$($vfield:tt,)*]
     ) => {
-        $name::$vname($(Rand!(@sub $vfield $rng.gen())),*)
+        $name::$vname($(Rand!(@substitute $vfield $rng.gen())),*)
     };
     (@enum record $rng:ident $name:ident $vname:ident
      [$({
@@ -195,7 +195,7 @@ macro_rules! Rand {
     (@struct tuple $rng:ident $name:ident
      [$($vfield:tt,)*]
     ) => {
-        $name($(Rand!(@sub $vfield $rng.gen())),*)
+        $name($(Rand!(@substitute $vfield $rng.gen())),*)
     };
     (@struct record $rng:ident $name:ident
      [$({
@@ -212,8 +212,7 @@ macro_rules! Rand {
             ),*
         }
     };
-    // substitute
-    (@sub $_input:tt $output:expr) => { $output };
+    (@substitute $_input:tt $output:expr) => { $output };
     (@as_item $i:item) => { $i };
 }
 
