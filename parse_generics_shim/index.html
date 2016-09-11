@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `parse_generics_shim` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, parse_generics_shim">
+
+    <title>parse_generics_shim - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'></p><script>window.sidebarCurrent = {name: 'parse_generics_shim', ty: 'mod', relpath: '../'};</script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>parse_generics_shim</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-0' class='srclink' href='../src/parse_generics_shim/lib.rs.html#10-531' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>This crate provides stable, partial implementations of the <code>parse_generics!</code> and <code>parse_where!</code> macros proposed in <a href="https://github.com/rust-lang/rfcs/pull/1583">RFC #1583</a>.  These macros serve two purposes:</p>
+
+<ol>
+<li>They allow crate authors to use the macros in a limited capacity whether or not the RFC is accepted.</li>
+<li>They demonstrate to the Rust core team that there is demand for this functionality.</li>
+<li>They provide a migration path from the partial implementation to the full one, assuming the RFC does get accepted.</li>
+</ol>
+
+<p>Because these macros are implemented using <code>macro_rules!</code>, they have the following limitations:</p>
+
+<ul>
+<li>In general, only lifetimes <code>&#39;a</code> through <code>&#39;z</code> are accepted.</li>
+<li>Only a subset of the full output formats are supported.</li>
+<li>They are significantly less efficient, and consume a non-trivial amount of the recursion limit.</li>
+</ul>
+
+<style type="text/css">
+.link-block { font-family: "Fira Sans"; }
+.link-block > p { display: inline-block; }
+.link-block > p > strong { font-weight: 500; margin-right: 1em; }
+.link-block > ul { display: inline-block; padding: 0; list-style: none; }
+.link-block > ul > li {
+  font-size: 0.8em;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  padding: 0.3em;
+  display: inline-block;
+}
+</style>
+
+<p><span></span><div class="link-block"></p>
+
+<p><strong>Links</strong></p>
+
+<ul>
+<li><a href="https://crates.io/crates/parse-generics-shim">Latest Release</a></li>
+<li><a href="https://danielkeep.github.io/rust-parse-generics/doc/parse_generics_shim/index.html">Latest Docs</a></li>
+<li><a href="https://github.com/DanielKeep/rust-parse-generics">Repository</a></li>
+</ul>
+
+<p><span></span></div></p>
+
+<h1 id='table-of-contents' class='section-header'><a href='#table-of-contents'>Table of Contents</a></h1>
+<ul>
+<li><a href="#parse_generics_shim"><code>parse_generics_shim!</code></a></li>
+<li><a href="#parse_where_shim"><code>parse_where_shim!</code></a></li>
+<li><a href="#using-parse-generics-poc">Using <code>parse-generics-poc</code></a></li>
+</ul>
+
+<h2 id='parse_generics_shim' class='section-header'><a href='#parse_generics_shim'><code>parse_generics_shim!</code></a></h2>
+<pre class='rust rust-example-rendered'>
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>parse_generics_shim</span> {
+    (
+        { $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>:<span class='ident'>ident</span>),<span class='op'>+</span> },
+        <span class='ident'>then</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>callback_name</span>:<span class='ident'>ident</span> <span class='op'>!</span> ( $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>callback_args</span>:<span class='ident'>tt</span>)<span class='op'>*</span> ),
+        $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>code</span>:<span class='ident'>tt</span>)<span class='op'>*</span>
+    ) <span class='op'>=&gt;</span> { ... };
+}</pre>
+
+<p>Parses a generic parameter list (if present) from the start of <code>$($code:tt)*</code>, expanding to the parsed information plus the unconsumed tokens <em>after</em> the parameter list.  The general form of the expansion is:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>callback_name</span><span class='op'>!</span> {
+    $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>callback_args</span>)<span class='op'>*</span>
+    {
+        $(
+            <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>: [ .. ],
+        )<span class='op'>+</span>
+    },
+    $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>)<span class='op'>*</span>
+}</pre>
+
+<h3 id='callback' class='section-header'><a href='#callback'>Callback</a></h3>
+<p><code>$callback_name</code> and <code>$callback_args</code> specify the macro to invoke with the result of parsing.  Note that <code>$callback_args</code> may be contained in <em>any</em> of <code>( .. )</code>, <code>[ .. ]</code>, or <code>{ .. }</code>.</p>
+
+<h3 id='fields' class='section-header'><a href='#fields'>Fields</a></h3>
+<p><code>$fields</code> indicates which pieces of information you want in the expansion.  The available fields are:</p>
+
+<ul>
+<li><code>constr</code> - comma-terminated list of generic parameters plus their constraints.</li>
+<li><code>params</code> - comma-terminated list of generic parameter names (both lifetimes and types).</li>
+<li><code>ltimes</code> - comma-terminated list of generic lifetime names.</li>
+<li><code>tnames</code> - comma-terminated list of generic type names.</li>
+</ul>
+
+<p>The shim <em>only</em> supports the following combinations:</p>
+
+<ul>
+<li><code>{ constr, params, ltimes, tnames }</code></li>
+<li><code>{ constr }</code></li>
+<li><code>{ .. }</code></li>
+</ul>
+
+<p>The fields will appear in the output in the same order they appear in the input.  One special case is <code>{ .. }</code> which causes <em>all</em> fields to be emitted, followed by a literal <code>..</code> token.</p>
+
+<p><strong>Warning</strong>: there is explicitly <em>no</em> guarantee that the list of fields will stay the same over time.  As such, it is <strong>strongly</strong> recommended that you never directly match the <code>..</code> token after the fields.  Instead, you should use the following construct:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>match_output</span> {
+    (
+        {
+            <span class='comment'>// Match the fields you care about.</span>
+            <span class='ident'>constr</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>constr</span>:<span class='ident'>tt</span>,
+            <span class='ident'>params</span>: [ $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>params</span>:<span class='ident'>tt</span>,)<span class='op'>*</span> ],
+
+            <span class='comment'>// Ignore the rest; *never* explicitly match `..`!</span>
+            $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>_fields</span>:<span class='ident'>tt</span>)<span class='op'>*</span>
+        },
+
+        $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>
+    ) <span class='op'>=&gt;</span> { ... };
+}</pre>
+
+<h3 id='code' class='section-header'><a href='#code'>Code</a></h3>
+<p><code>$code</code> is the actual source code to be parsed.  If it starts with <code>&lt;</code>, the macro will parse a generic parameter list.  If it <em>does not</em> start with <code>&lt;</code>, the macro will proceed as though the input started with an empty generic parameter list (<em>i.e.</em> <code>&lt;&gt;</code>).</p>
+
+<h3 id='examples' class='section-header'><a href='#examples'>Examples</a></h3>
+<p>The following show how the various invocation forms affect the output:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro'>parse_generics_shim</span><span class='macro'>!</span> {
+    { <span class='ident'>constr</span>, <span class='ident'>params</span>, <span class='ident'>ltimes</span>, <span class='ident'>tnames</span> },
+    <span class='ident'>then</span> <span class='macro'>stringify</span><span class='macro'>!</span>(<span class='ident'>output</span>:),
+    <span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span>: <span class='lifetime'>&#39;a</span> <span class='op'>+</span> <span class='ident'>Copy</span><span class='op'>&gt;</span> <span class='ident'>X</span>
+}
+
+<span class='comment'>// Expands to:</span>
+<span class='macro'>stringify</span><span class='macro'>!</span>(
+    <span class='ident'>output</span>: {
+        <span class='ident'>constr</span>: [ <span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span>: <span class='lifetime'>&#39;a</span> <span class='op'>+</span> <span class='ident'>Copy</span>, ],
+        <span class='ident'>params</span>: [ <span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span>, ],
+        <span class='ident'>ltimes</span>: [ <span class='lifetime'>&#39;a</span>, ],
+        <span class='ident'>tnames</span>: [ <span class='ident'>T</span>, <span class='ident'>U</span>, ],
+    },
+    <span class='ident'>X</span>
+)</pre>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro'>parse_generics_shim</span><span class='macro'>!</span> {
+    { <span class='ident'>constr</span> },
+    <span class='ident'>then</span> <span class='macro'>stringify</span><span class='macro'>!</span>(<span class='ident'>output</span>:),
+    <span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span>: <span class='lifetime'>&#39;a</span> <span class='op'>+</span> <span class='ident'>Copy</span><span class='op'>&gt;</span> <span class='ident'>X</span>
+}
+
+<span class='comment'>// Expands to:</span>
+<span class='macro'>stringify</span><span class='macro'>!</span>(
+    <span class='ident'>output</span>: {
+        <span class='ident'>constr</span>: [ <span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span>: <span class='lifetime'>&#39;a</span> <span class='op'>+</span> <span class='ident'>Copy</span>, ],
+    },
+    <span class='ident'>X</span>
+)</pre>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro'>parse_generics_shim</span><span class='macro'>!</span> {
+    { .. },
+    <span class='ident'>then</span> <span class='macro'>stringify</span><span class='macro'>!</span>(<span class='ident'>output</span>:),
+    <span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span>: <span class='lifetime'>&#39;a</span> <span class='op'>+</span> <span class='ident'>Copy</span><span class='op'>&gt;</span> <span class='ident'>X</span>
+}
+
+<span class='comment'>// Expands to:</span>
+<span class='macro'>stringify</span><span class='macro'>!</span>(
+    <span class='ident'>output</span>: {
+        <span class='ident'>constr</span>: [ <span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span>: <span class='lifetime'>&#39;a</span> <span class='op'>+</span> <span class='ident'>Copy</span>, ],
+        <span class='ident'>params</span>: [ <span class='lifetime'>&#39;a</span>, <span class='ident'>T</span>, <span class='ident'>U</span>, ],
+        <span class='ident'>ltimes</span>: [ <span class='lifetime'>&#39;a</span>, ],
+        <span class='ident'>tnames</span>: [ <span class='ident'>T</span>, <span class='ident'>U</span>, ],
+        ..
+    },
+    <span class='ident'>X</span>
+)</pre>
+
+<p>The input does not <em>have</em> to start with a generic parameter list.  Note that both of the invocations below expand to the same result:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro'>parse_generics_shim</span><span class='macro'>!</span> {
+    { <span class='ident'>constr</span>, <span class='ident'>params</span>, <span class='ident'>ltimes</span>, <span class='ident'>tnames</span> },
+    <span class='ident'>then</span> <span class='macro'>stringify</span><span class='macro'>!</span>(<span class='ident'>output</span>:),
+    <span class='op'>&lt;</span><span class='op'>&gt;</span> <span class='ident'>X</span>
+}
+
+<span class='comment'>// Expands to:</span>
+<span class='macro'>stringify</span><span class='macro'>!</span>(
+    <span class='ident'>output</span>: {
+        <span class='ident'>constr</span>: [],
+        <span class='ident'>params</span>: [],
+        <span class='ident'>ltimes</span>: [],
+        <span class='ident'>tnames</span>: [],
+    },
+    <span class='ident'>X</span>
+)</pre>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro'>parse_generics_shim</span><span class='macro'>!</span> {
+    { <span class='ident'>constr</span>, <span class='ident'>params</span>, <span class='ident'>ltimes</span>, <span class='ident'>tnames</span> },
+    <span class='ident'>then</span> <span class='macro'>stringify</span><span class='macro'>!</span>(<span class='ident'>output</span>:),
+    <span class='ident'>X</span>
+}
+
+<span class='comment'>// Expands to:</span>
+<span class='macro'>stringify</span><span class='macro'>!</span>(
+    <span class='ident'>output</span>: {
+        <span class='ident'>constr</span>: [],
+        <span class='ident'>params</span>: [],
+        <span class='ident'>ltimes</span>: [],
+        <span class='ident'>tnames</span>: [],
+    },
+    <span class='ident'>X</span>
+)</pre>
+
+<h2 id='parse_where_shim' class='section-header'><a href='#parse_where_shim'><code>parse_where_shim!</code></a></h2>
+<pre class='rust rust-example-rendered'>
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>parse_where_shim</span> {
+    (
+        { $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>:<span class='ident'>ident</span>),<span class='op'>+</span> },
+        <span class='ident'>then</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>callback_name</span>:<span class='ident'>ident</span> <span class='op'>!</span> ( $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>callback_args</span>:<span class='ident'>tt</span>)<span class='op'>*</span> ),
+        $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>code</span>:<span class='ident'>tt</span>)<span class='op'>*</span>
+    ) <span class='op'>=&gt;</span> { ... };
+}</pre>
+
+<p>Parses a <code>where</code> clause (if present) from the start of <code>$($code:tt)*</code>, expanding to the parsed information plus the unconsumed tokens <em>after</em> the clause.  The general form of the expansion is:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>callback_name</span><span class='op'>!</span> {
+    $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>callback_args</span>)<span class='op'>*</span>
+    {
+        $(
+            <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>: [ .. ],
+        )<span class='op'>+</span>
+    },
+    $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>)<span class='op'>*</span>
+}</pre>
+
+<h3 id='callback-1' class='section-header'><a href='#callback-1'>Callback</a></h3>
+<p><code>$callback_name</code> and <code>$callback_args</code> specify the macro to invoke with the result of parsing.  Note that <code>$callback_args</code> may be contained in <em>any</em> of <code>( .. )</code>, <code>[ .. ]</code>, or <code>{ .. }</code>.</p>
+
+<h3 id='fields-1' class='section-header'><a href='#fields-1'>Fields</a></h3>
+<p><code>$fields</code> indicates which pieces of information you want in the expansion.  The available fields are:</p>
+
+<ul>
+<li><code>clause</code> - comma-terminated clause <em>including</em> the <code>where</code> keyword.  If there is no clause, the <code>where</code> keyword is omitted.  Use this if you simply wish to pass a <code>where</code> clause through unmodified.</li>
+<li><code>preds</code> - comma-terminated list of predicates.  Use this if you wish to modify or append to the predicates.</li>
+</ul>
+
+<p>The shim <em>only</em> supports the following combinations:</p>
+
+<ul>
+<li><code>{ clause, preds }</code></li>
+<li><code>{ preds }</code></li>
+<li><code>{ .. }</code></li>
+</ul>
+
+<p>The fields will appear in the output in the same order they appear in the input.  One special case is <code>{ .. }</code> which causes <em>all</em> fields to be emitted, followed by a literal <code>..</code> token.</p>
+
+<p><strong>Warning</strong>: there is explicitly <em>no</em> guarantee that the list of fields will stay the same over time.  As such, it is <strong>strongly</strong> recommended that you never directly match the <code>..</code> token after the fields.  Instead, you should use the following construct:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>match_output</span> {
+    (
+        {
+            <span class='comment'>// Match the fields you care about.</span>
+            <span class='ident'>clause</span>: [ $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>clause</span>:<span class='ident'>tt</span>)<span class='op'>*</span> ],
+
+            <span class='comment'>// Ignore the rest; *never* explicitly match `..`!</span>
+            $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>_fields</span>:<span class='ident'>tt</span>)<span class='op'>*</span>
+        },
+
+        $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tail</span>:<span class='ident'>tt</span>)<span class='op'>*</span>
+    ) <span class='op'>=&gt;</span> { ... };
+}</pre>
+
+<h3 id='code-1' class='section-header'><a href='#code-1'>Code</a></h3>
+<p><code>$code</code> is the actual source code to be parsed.  If it starts with <code>where</code>, the macro will parse a <code>where</code> clause, stopping when it encounters any of the following: <code>;</code>, <code>{</code>, or <code>=</code>.  If it <em>does not</em> start with <code>where</code>, the macro will expand with an empty predicate list.</p>
+
+<h3 id='examples-1' class='section-header'><a href='#examples-1'>Examples</a></h3>
+<p>The following show how the various invocation forms affect the output:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro'>parse_where_shim</span><span class='macro'>!</span> {
+    { <span class='ident'>preds</span> },
+    <span class='ident'>then</span> <span class='macro'>stringify</span><span class='macro'>!</span>(<span class='ident'>output</span>:),
+    <span class='kw'>where</span>
+        <span class='lifetime'>&#39;a</span>: <span class='lifetime'>&#39;b</span>,
+        <span class='ident'>T</span>: <span class='lifetime'>&#39;a</span> <span class='op'>+</span> <span class='ident'>Copy</span>,
+        <span class='kw'>for</span><span class='op'>&lt;</span><span class='lifetime'>&#39;c</span><span class='op'>&gt;</span> <span class='ident'>U</span>: <span class='ident'>Foo</span><span class='op'>&lt;</span><span class='lifetime'>&#39;c</span><span class='op'>&gt;</span>,
+    { <span class='kw'>struct</span> <span class='ident'>fields</span>... }
+}
+
+<span class='comment'>// Expands to:</span>
+<span class='macro'>stringify</span><span class='macro'>!</span>(
+    <span class='ident'>output</span>: {
+        <span class='ident'>preds</span>: [ <span class='lifetime'>&#39;a</span>: <span class='lifetime'>&#39;b</span>, <span class='ident'>T</span>: <span class='lifetime'>&#39;a</span> <span class='op'>+</span> <span class='ident'>Copy</span>, <span class='kw'>for</span><span class='op'>&lt;</span><span class='lifetime'>&#39;c</span>,<span class='op'>&gt;</span> <span class='ident'>U</span>: <span class='ident'>Foo</span><span class='op'>&lt;</span><span class='lifetime'>&#39;c</span><span class='op'>&gt;</span>, ],
+    },
+    { <span class='kw'>struct</span> <span class='ident'>fields</span>... }
+)</pre>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro'>parse_where_shim</span><span class='macro'>!</span> {
+    { .. },
+    <span class='ident'>then</span> <span class='macro'>stringify</span><span class='macro'>!</span>(<span class='ident'>output</span>:),
+    <span class='kw'>where</span>
+        <span class='lifetime'>&#39;a</span>: <span class='lifetime'>&#39;b</span>,
+        <span class='ident'>T</span>: <span class='lifetime'>&#39;a</span> <span class='op'>+</span> <span class='ident'>Copy</span>,
+        <span class='kw'>for</span><span class='op'>&lt;</span><span class='lifetime'>&#39;c</span><span class='op'>&gt;</span> <span class='ident'>U</span>: <span class='ident'>Foo</span><span class='op'>&lt;</span><span class='lifetime'>&#39;c</span><span class='op'>&gt;</span>,
+    { <span class='kw'>struct</span> <span class='ident'>fields</span>... }
+}
+
+<span class='comment'>// Expands to:</span>
+<span class='macro'>stringify</span><span class='macro'>!</span>(
+    <span class='ident'>output</span>: {
+        <span class='ident'>clause</span>: [ <span class='kw'>where</span> <span class='lifetime'>&#39;a</span>: <span class='lifetime'>&#39;b</span>, <span class='ident'>T</span>: <span class='lifetime'>&#39;a</span> <span class='op'>+</span> <span class='ident'>Copy</span>, <span class='kw'>for</span><span class='op'>&lt;</span><span class='lifetime'>&#39;c</span>,<span class='op'>&gt;</span> <span class='ident'>U</span>: <span class='ident'>Foo</span><span class='op'>&lt;</span><span class='lifetime'>&#39;c</span><span class='op'>&gt;</span>, ],
+        <span class='ident'>preds</span>: [ <span class='lifetime'>&#39;a</span>: <span class='lifetime'>&#39;b</span>, <span class='ident'>T</span>: <span class='lifetime'>&#39;a</span> <span class='op'>+</span> <span class='ident'>Copy</span>, <span class='kw'>for</span><span class='op'>&lt;</span><span class='lifetime'>&#39;c</span>,<span class='op'>&gt;</span> <span class='ident'>U</span>: <span class='ident'>Foo</span><span class='op'>&lt;</span><span class='lifetime'>&#39;c</span><span class='op'>&gt;</span>, ],
+        ..
+    },
+    { <span class='kw'>struct</span> <span class='ident'>fields</span>... }
+)</pre>
+
+<p>The input does not <em>have</em> to start with a <code>where</code> clause:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro'>parse_where_shim</span><span class='macro'>!</span> {
+    { <span class='ident'>preds</span> },
+    <span class='ident'>then</span> <span class='macro'>stringify</span><span class='macro'>!</span>(<span class='ident'>output</span>:),
+    ; <span class='ident'>X</span>
+}
+
+<span class='comment'>// Expands to:</span>
+<span class='macro'>stringify</span><span class='macro'>!</span>(
+    <span class='ident'>output</span>: {
+        <span class='ident'>preds</span>: [],
+    },
+    ; <span class='ident'>X</span>
+)</pre>
+
+<h2 id='using-parse-generics-poc' class='section-header'><a href='#using-parse-generics-poc'>Using <code>parse-generics-poc</code></a></h2>
+<h3 id='for-crate-authors' class='section-header'><a href='#for-crate-authors'>For Crate Authors</a></h3>
+<p>Add the following to your <code>Cargo.toml</code> manifest:</p>
+
+<pre><code class="language-toml">[features]
+use-parse-generics-poc = [
+    &quot;parse-generics-poc&quot;,
+    &quot;parse-generics-shim/use-parse-generics-poc&quot;,
+]
+
+[dependencies]
+parse-generics-poc = { version = &quot;0.1.0&quot;, optional = true }
+parse-generics-shim = &quot;0.1.0&quot;
+</code></pre>
+
+<p>This allows your users to enable the proof-of-concept compiler plugin <em>through</em> your crate.  You should also copy and modify the following section (replacing <code>whizzo</code> with your crate&#39;s name).</p>
+
+<h3 id='for-crate-users' class='section-header'><a href='#for-crate-users'>For Crate Users</a></h3>
+<p>Add the following to your <code>Cargo.toml</code> manifest:</p>
+
+<pre><code class="language-toml">[features]
+use-parse-generics-poc = [
+    &quot;whizzo/use-parse-generics-poc&quot;,
+    &quot;parse-generics-poc&quot;,
+    &quot;parse-generics-shim/use-parse-generics-poc&quot;,
+]
+
+[dependencies]
+whizzo = &quot;0.1.0&quot;
+parse-generics-poc = { version = &quot;0.1.0&quot;, optional = true }
+parse-generics-shim = &quot;0.1.0&quot;
+</code></pre>
+
+<p>Then, add the following to your crate&#39;s root module:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span><span class='op'>=</span><span class='string'>&quot;parse-generics-poc&quot;</span>, <span class='ident'>feature</span>(<span class='ident'>plugin</span>))]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span><span class='op'>=</span><span class='string'>&quot;parse-generics-poc&quot;</span>, <span class='ident'>plugin</span>(<span class='ident'>parse_generics_poc</span>))]</span>
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>parse_generics_shim</span>;
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>whizzo</span>;</pre>
+
+<p>By default, this will use stable-but-inferior implementations of the generics-parsing macros.  In particular, you cannot use lifetimes other than <code>&#39;a</code> through <code>&#39;z</code>, and macros may fail to expand for sufficiently complex inputs.</p>
+
+<p>If a macro fails to expand due to the &quot;recursion limit&quot;, place the following attribute at the top of your crate&#39;s root module, and raise the number until the macro works:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>recursion_limit</span><span class='op'>=</span><span class='string'>&quot;32&quot;</span>]</span></pre>
+
+<p>If you are using a compatible nightly compiler, you can enable the fully-featured versions of the generics-parsing macros (see the proposed <a href="https://github.com/rust-lang/rfcs/pull/1583">RFC #1583</a> for context).  If you have followed the instructions above, this can be done by adding <code>--features=use-parse-generic-poc</code> to your <code>cargo build</code> command.</p>
+
+<p>The <a href="https://danielkeep.github.io/rust-parse-generics/doc/parse_generics_poc/index.html">documentation for <code>parse-generics-poc</code></a> will specify <em>which</em> nightly it is known to be compatible with.  If you are using <code>rustup</code>, you can configure your crate to use the appropriate compiler using the following (replacing the date shown with the one listed in the <code>parse-generics-poc</code> documentation):</p>
+
+<pre><code class="language-sh">rustup override add nightly-2016-04-06
+</code></pre>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "parse_generics_shim";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

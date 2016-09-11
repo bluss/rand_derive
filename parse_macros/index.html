@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `parse_macros` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, parse_macros">
+
+    <title>parse_macros - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'></p><script>window.sidebarCurrent = {name: 'parse_macros', ty: 'mod', relpath: '../'};</script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>parse_macros</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-0' class='srclink' href='../src/parse_macros/lib.rs.html#10-529' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>This crate provides high-level macros for parsing various Rust constructs.</p>
+
+<p>Specifically, these macros are concerned with taking Rust source constructs and rewriting them into a format which is more easily consumable by <code>macro_rules!</code> macros.</p>
+
+<style type="text/css">
+.link-block { font-family: "Fira Sans"; }
+.link-block > p { display: inline-block; }
+.link-block > p > strong { font-weight: 500; margin-right: 1em; }
+.link-block > ul { display: inline-block; padding: 0; list-style: none; }
+.link-block > ul > li {
+  font-size: 0.8em;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  padding: 0.3em;
+  display: inline-block;
+}
+</style>
+
+<p><span></span><div class="link-block"></p>
+
+<p><strong>Links</strong></p>
+
+<ul>
+<li><a href="https://danielkeep.github.io/rust-parse-generics/doc/parse_macros/index.html">Latest Docs</a></li>
+<li><a href="https://github.com/DanielKeep/rust-parse-generics">Repository</a></li>
+</ul>
+
+<p><span></span></div></p>
+
+<h2 id='table-of-contents' class='section-header'><a href='#table-of-contents'>Table of Contents</a></h2>
+<ul>
+<li><a href="#parse_enum"><code>parse_enum!</code></a></li>
+<li><a href="#parse_item"><code>parse_item!</code></a></li>
+<li><a href="#parse_struct"><code>parse_struct!</code></a></li>
+<li><a href="#using-parse-macros">Using <code>parse-macros</code></a></li>
+</ul>
+
+<h2 id='parse_enum' class='section-header'><a href='#parse_enum'><code>parse_enum!</code></a></h2>
+<pre class='rust rust-example-rendered'>
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>parse_enum</span> {
+    (
+        <span class='ident'>then</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>cb</span>:<span class='macro'>ident</span><span class='macro'>!</span>( $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>cb_arg</span>:<span class='ident'>tt</span>)<span class='op'>*</span> ),
+        $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>body</span>:<span class='ident'>tt</span>)<span class='op'>*</span>
+    ) <span class='op'>=&gt;</span> { ... };
+}</pre>
+
+<p>Parses <code>$body</code> as an <code>enum</code>, invoking the macro <code>$cb</code> with the result.  The general form of the expansion is:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>cb</span><span class='op'>!</span> {
+    $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>cb_arg</span>)<span class='op'>*</span>
+    <span class='kw'>enum</span> {
+        <span class='ident'>attrs</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>attrs</span>:<span class='ident'>tt</span>,
+        <span class='ident'>vis</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>vis</span>:<span class='ident'>tt</span>,
+        <span class='ident'>name</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span>:<span class='ident'>ident</span>,
+        <span class='ident'>generics</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>generics</span>:<span class='ident'>tt</span>,
+        <span class='kw'>where</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>where_</span>:<span class='ident'>tt</span>,
+        <span class='ident'>variants</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>variants</span>:<span class='ident'>tt</span>,
+        <span class='ident'>num_variants</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>num_variants</span>:<span class='ident'>tt</span>,
+    }
+}</pre>
+
+<h3 id='callback' class='section-header'><a href='#callback'>Callback</a></h3>
+<p><code>$cb_name</code> and <code>$cb_arg</code> specify the macro to invoke with the result of parsing.  Note that <code>$cb_arg</code> may be contained in <em>any</em> of <code>( .. )</code>, <code>[ .. ]</code>, or <code>{ .. }</code>.</p>
+
+<h3 id='fields' class='section-header'><a href='#fields'>Fields</a></h3>
+<p>The expansion contains the following fields:</p>
+
+<ul>
+<li><p><code>$attrs</code>: a <code>[ .. ]</code>-delimited list of attributes.  <em>e.g.</em>: <code>[ #[doc=&quot;Does a thing&quot;] #[repr(u8)] ]</code>.</p></li>
+<li><p><code>$vis</code>: a <code>( .. )</code>-delimited visibility annotation.  <em>e.g.</em>: <code>()</code>, <code>(pub)</code>.</p></li>
+<li><p><code>$name</code>: the <code>enum</code>&#39;s name as an identifier.  <em>e.g.</em>: <code>Option</code>.</p></li>
+<li><p><code>$generics</code>: the <code>{ .. }</code>-delimited output of <code>parse_generics_shim!</code> for the <code>enum</code>, containing the <code>constr</code>, <code>params</code>, <code>ltimes</code>, and <code>tnames</code> fields:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='ident'>generics</span>: {
+    <span class='ident'>constr</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>constr</span>:<span class='ident'>tt</span>,
+    <span class='ident'>params</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>params</span>:<span class='ident'>tt</span>,
+    <span class='ident'>ltimes</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ltimes</span>:<span class='ident'>tt</span>,
+    <span class='ident'>tnames</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tnames</span>:<span class='ident'>tt</span>,
+}</pre>
+
+<ul>
+<li><p><code>$constr</code>: a <code>[ .. ]</code>-delimited, comma-terminated list of generic constraints.  <em>e.g.</em> <code>[&#39;a, &#39;b: &#39;a, T, U: &#39;a + Copy,]</code>.</p></li>
+<li><p><code>$params</code>: a <code>[ .. ]</code>-delimited, comma-terminated list of generic parameter names.  <em>e.g.</em> <code>[&#39;a, &#39;b, T, U,]</code>.</p></li>
+<li><p><code>$ltimes</code>: a <code>[ .. ]</code>-delimited, comma-terminated list of generic lifetime parameters.  <em>e.g.</em> <code>[&#39;a, &#39;b,]</code>.</p></li>
+<li><p><code>$tnames</code>: a <code>[ .. ]</code>-delimited, comma-terminated list of generic type parameters.  <em>e.g.</em> <code>[T, U,]</code>.</p></li>
+</ul></li>
+<li><p><code>$where_</code>: the <code>{ .. }</code>-delimited output of <code>parse_where_shim!</code> for the <code>enum</code>, containing the <code>clause</code>, and <code>preds</code> fields:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='kw'>where</span>: {
+    <span class='ident'>clause</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>clause</span>:<span class='ident'>tt</span>,
+    <span class='ident'>preds</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>preds</span>:<span class='ident'>tt</span>,
+}</pre>
+
+<ul>
+<li><p><code>$clause</code>: a <code>[ .. ]</code>-delimited, comma-terminated clause, including the <code>where</code> keyword.  If the clause is empty, the <code>where</code> keyword is omitted, and the brackets are empty.  <em>e.g.</em> <code>[]</code>, <code>[ where for&lt;&#39;a&gt; T: Fn(&amp;&#39;a i32), ]</code>.</p></li>
+<li><p><code>$preds</code>: a <code>[ .. ]</code>-delimited, comma-terminated list of clause predicates.  <em>e.g.</em> <code>[]</code>, <code>[ for&lt;&#39;a&gt; T: Fn(&amp;&#39;a i32), ]</code>.</p></li>
+</ul></li>
+<li><p><code>$variants</code>: a <code>[ .. ]</code>-delimited, comma-terminated list of variants (described below).</p></li>
+<li><p><code>$num_variants</code>: the number of variants in the <code>enum</code>.  <em>e.g.</em> <code>2</code>.</p></li>
+</ul>
+
+<p>Each variant has the following form:</p>
+
+<pre class='rust rust-example-rendered'>
+{
+    <span class='ident'>ord</span>: (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>vord_index</span>:<span class='ident'>tt</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>vord_ident</span>:<span class='ident'>ident</span>),
+    <span class='ident'>attrs</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>vattrs</span>:<span class='ident'>tt</span>,
+    <span class='ident'>kind</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>vkind</span>:<span class='ident'>ident</span>,
+    <span class='ident'>name</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>vname</span>:<span class='ident'>ident</span>,
+    <span class='ident'>fields</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>vfields</span>:<span class='ident'>tt</span>,
+    <span class='ident'>num_fields</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>vnum_fields</span>:<span class='ident'>tt</span>,
+}</pre>
+
+<ul>
+<li><p><code>$vord_index</code>: the 0-based ordinal for this variant.  <em>e.g.</em> <code>1</code>.</p></li>
+<li><p><code>$vord_ident</code>: an identifier guaranteed to be unique relative to other variants <em>for the same <code>enum</code></em>.  Identifiers are <em>not</em> guaranteed to be unique between different <code>parse_enum!</code> invocations.  <em>e.g.</em> <code>_ord_01</code>.</p></li>
+<li><p><code>$vattrs</code>: a <code>[ .. ]</code>-delimited list of attributes attached to the variant.  <em>e.g.</em> <code>[ #[doc=&quot;A variant unlike the rest.&quot;] ]</code>.</p></li>
+<li><p><code>$vkind</code>: one of <code>unitary</code>, <code>tuple</code>, or <code>record</code>.</p></li>
+<li><p><code>$vname</code>: the variant&#39;s name as an identifier.  <em>e.g.</em> <code>None</code>.</p></li>
+<li><p><code>$vfields</code>: a <code>[ .. ]</code>-delimited, comma-terminated list of fields (described below).</p></li>
+<li><p><code>$vnum_fields</code>: the number of fields in the variant.  <em>e.g.</em> <code>1</code>.</p></li>
+</ul>
+
+<p>Variant fields have the following form:</p>
+
+<pre class='rust rust-example-rendered'>
+{
+    <span class='ident'>ord</span>: (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ford_index</span>:<span class='ident'>tt</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ford_ident</span>:<span class='ident'>ident</span>),
+    <span class='ident'>attrs</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fattrs</span>:<span class='ident'>tt</span>,
+    <span class='ident'>vis</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fvis</span>:<span class='ident'>tt</span>,
+    <span class='ident'>ty</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fty</span>:<span class='ident'>ty</span>,
+
+    <span class='comment'>// **NOTE**: only exists for *record* variant fields:</span>
+    <span class='ident'>name</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fname</span>:<span class='ident'>ident</span>,
+}</pre>
+
+<ul>
+<li><p><code>$ford_index</code>: the 0-based ordinal for this variant field.  <em>e.g.</em> <code>1</code>.</p></li>
+<li><p><code>$ford_ident</code>: an identifier guaranteed to be unique relative to other fields <em>for the same variant</em>.  Identifiers are <em>not</em> guaranteed to be unique between different <code>parse_enum!</code> invocations, or between variants in the same invocation.  <em>e.g.</em> <code>_ord_01</code>.</p></li>
+<li><p><code>$fattrs</code>: a <code>[ .. ]</code>-delimited list of attributes attached to the variant field.  <em>e.g.</em> <code>[ #[doc=&quot;A part of the whole.&quot;] ]</code>.</p></li>
+<li><p><code>$fvis</code>: a <code>( .. )</code>-delimited visibility annotation.  <em>e.g.</em>: <code>()</code>, <code>(pub)</code>.</p></li>
+<li><p><code>$fty</code>: the type of the variant field.</p></li>
+<li><p><code>$fname</code>: the variant field&#39;s name as an identifier.  <em>e.g.</em> <code>part</code>.</p></li>
+</ul>
+
+<h3 id='example' class='section-header'><a href='#example'>Example</a></h3>
+<pre class='rust rust-example-rendered'>
+<span class='macro'>parse_enum</span><span class='macro'>!</span> {
+    <span class='ident'>then</span> <span class='macro'>stringify</span><span class='macro'>!</span>(<span class='ident'>output</span>:),
+    <span class='doccomment'>/// The `Option` type.</span>
+    <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+        <span class='doccomment'>/// No value.</span>
+        <span class='prelude-val'>None</span>,
+        <span class='doccomment'>/// Some value `T`.</span>
+        <span class='prelude-val'>Some</span>(<span class='ident'>T</span>),
+        <span class='doccomment'>/// File could not be found.</span>
+        <span class='ident'>FileNotFound</span> { <span class='ident'>path</span>: <span class='ident'>PathBuf</span> },
+    }
+}
+
+<span class='comment'>// Expands to:</span>
+<span class='macro'>stringify</span><span class='macro'>!</span>(
+    <span class='ident'>output</span>:
+    <span class='kw'>enum</span> {
+        <span class='ident'>attrs</span>: [ <span class='attribute'>#[<span class='ident'>doc</span><span class='op'>=</span><span class='string'>r&quot;The `Option` type.&quot;</span>]</span> ],
+        <span class='ident'>vis</span>: (<span class='kw'>pub</span>),
+        <span class='ident'>name</span>: <span class='prelude-ty'>Option</span>,
+        <span class='ident'>generics</span>: {
+            <span class='ident'>constr</span>: [<span class='ident'>T</span>,],
+            <span class='ident'>params</span>: [<span class='ident'>T</span>,],
+            <span class='ident'>ltimes</span>: [],
+            <span class='ident'>tnames</span>: [<span class='ident'>T</span>,],
+        },
+        <span class='kw'>where</span>: {
+            <span class='ident'>clause</span>: [],
+            <span class='ident'>preds</span>: [],
+        },
+        <span class='ident'>variants</span>: [
+            {
+                <span class='ident'>ord</span>: (<span class='number'>0</span>, <span class='ident'>_ord_00</span>),
+                <span class='ident'>attrs</span>: [ <span class='attribute'>#[<span class='ident'>doc</span><span class='op'>=</span><span class='string'>r&quot;No value.&quot;</span>]</span> ],
+                <span class='ident'>kind</span>: <span class='ident'>unitary</span>,
+                <span class='ident'>name</span>: <span class='prelude-val'>None</span>,
+                <span class='ident'>fields</span>: [],
+                <span class='ident'>num_fields</span>: <span class='number'>0</span>,
+            },
+            {
+                <span class='ident'>ord</span>: (<span class='number'>1</span>, <span class='ident'>_ord_01</span>),
+                <span class='ident'>attrs</span>: [ <span class='attribute'>#[<span class='ident'>doc</span><span class='op'>=</span><span class='string'>r&quot;Some value `T`.&quot;</span>]</span> ],
+                <span class='ident'>kind</span>: <span class='ident'>tuple</span>,
+                <span class='ident'>name</span>: <span class='prelude-val'>Some</span>,
+                <span class='ident'>fields</span>: [
+                    {
+                        <span class='ident'>ord</span>: (<span class='number'>0</span>, <span class='ident'>_ord_00</span>),
+                        <span class='ident'>attrs</span>: [],
+                        <span class='ident'>vis</span>: (),
+                        <span class='ident'>ty</span>: <span class='ident'>T</span>,
+                    },
+                ],
+                <span class='ident'>num_fields</span>: <span class='number'>1</span>,
+            },
+            {
+                <span class='ident'>ord</span>: (<span class='number'>2</span>, <span class='ident'>_ord_02</span>),
+                <span class='ident'>attrs</span>: [ <span class='attribute'>#[<span class='ident'>doc</span><span class='op'>=</span><span class='string'>r&quot;File could not be found.&quot;</span>]</span> ],
+                <span class='ident'>kind</span>: <span class='ident'>record</span>,
+                <span class='ident'>name</span>: <span class='ident'>FileNotFound</span>,
+                <span class='ident'>fields</span>: [
+                    {
+                        <span class='ident'>ord</span>: (<span class='number'>0</span>, <span class='ident'>_ord_00</span>),
+                        <span class='ident'>attrs</span>: [],
+                        <span class='ident'>vis</span>: (),
+                        <span class='ident'>ty</span>: <span class='ident'>PathBuf</span>,
+                        <span class='ident'>name</span>: <span class='ident'>path</span>,
+                    },
+                ],
+                <span class='ident'>num_fields</span>: <span class='number'>1</span>,
+            },
+        ],
+        <span class='ident'>num_variants</span>: <span class='number'>3</span>,
+    }
+)</pre>
+
+<h2 id='parse_item' class='section-header'><a href='#parse_item'><code>parse_item!</code></a></h2>
+<pre class='rust rust-example-rendered'>
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>parse_item</span> {
+    (
+        <span class='ident'>then</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>cb</span>:<span class='macro'>ident</span><span class='macro'>!</span>( $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>cb_arg</span>:<span class='ident'>tt</span>)<span class='op'>*</span> ),
+        $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>body</span>:<span class='ident'>tt</span>)<span class='op'>*</span>
+    ) <span class='op'>=&gt;</span> { ... };
+}</pre>
+
+<p>Parses <code>$body</code> as an item, invoking the macro <code>$cb</code> with the result.  This forwards to the appropriate <code>parse_*!</code> macro, depending on what kind of item is in <code>$body</code>.</p>
+
+<p>See <a href="#parse_enum"><code>parse_enum!</code></a>, and <a href="#parse_struct"><code>parse_struct!</code></a> for more details.</p>
+
+<h2 id='parse_struct' class='section-header'><a href='#parse_struct'><code>parse_struct!</code></a></h2>
+<pre class='rust rust-example-rendered'>
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>parse_struct</span> {
+    (
+        <span class='ident'>then</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>cb</span>:<span class='macro'>ident</span><span class='macro'>!</span>( $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>cb_arg</span>:<span class='ident'>tt</span>)<span class='op'>*</span> ),
+        $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>body</span>:<span class='ident'>tt</span>)<span class='op'>*</span>
+    ) <span class='op'>=&gt;</span> { ... };
+}</pre>
+
+<p>Parses <code>$body</code> as a <code>struct</code>, invoking the macro <code>$cb</code> with the result.  The general form of the expansion is:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>cb</span><span class='op'>!</span> {
+    $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>cb_arg</span>)<span class='op'>*</span>
+    <span class='kw'>struct</span> {
+        <span class='ident'>attrs</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>attrs</span>:<span class='ident'>tt</span>,
+        <span class='ident'>vis</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>vis</span>:<span class='ident'>tt</span>,
+        <span class='ident'>name</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>name</span>:<span class='ident'>ident</span>,
+        <span class='ident'>generics</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>generics</span>:<span class='ident'>tt</span>,
+        <span class='kw'>where</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>where_</span>:<span class='ident'>tt</span>,
+        <span class='ident'>kind</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>kind</span>:<span class='ident'>ident</span>,
+        <span class='ident'>fields</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fields</span>:<span class='ident'>tt</span>,
+        <span class='ident'>num_fields</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>num_fields</span>:<span class='ident'>tt</span>,
+    }
+}</pre>
+
+<h3 id='callback-1' class='section-header'><a href='#callback-1'>Callback</a></h3>
+<p><code>$cb_name</code> and <code>$cb_arg</code> specify the macro to invoke with the result of parsing.  Note that <code>$cb_arg</code> may be contained in <em>any</em> of <code>( .. )</code>, <code>[ .. ]</code>, or <code>{ .. }</code>.</p>
+
+<h3 id='fields-1' class='section-header'><a href='#fields-1'>Fields</a></h3>
+<p>The expansion contains the following fields:</p>
+
+<ul>
+<li><p><code>$attrs</code>: a <code>[ .. ]</code>-delimited list of attributes.  <em>e.g.</em>: <code>[ #[doc=&quot;Does a thing&quot;] #[repr(C)] ]</code>.</p></li>
+<li><p><code>$vis</code>: a <code>( .. )</code>-delimited visibility annotation.  <em>e.g.</em>: <code>()</code>, <code>(pub)</code>.</p></li>
+<li><p><code>$name</code>: the <code>struct</code>&#39;s name as an identifier.  <em>e.g.</em>: <code>Option</code>.</p></li>
+<li><p><code>$generics</code>: the <code>{ .. }</code>-delimited output of <code>parse_generics_shim!</code> for the <code>struct</code>, containing the <code>constr</code>, <code>params</code>, <code>ltimes</code>, and <code>tnames</code> fields:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='ident'>generics</span>: {
+    <span class='ident'>constr</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>constr</span>:<span class='ident'>tt</span>,
+    <span class='ident'>params</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>params</span>:<span class='ident'>tt</span>,
+    <span class='ident'>ltimes</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ltimes</span>:<span class='ident'>tt</span>,
+    <span class='ident'>tnames</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tnames</span>:<span class='ident'>tt</span>,
+}</pre>
+
+<ul>
+<li><p><code>$constr</code>: a <code>[ .. ]</code>-delimited, comma-terminated list of generic constraints.  <em>e.g.</em> <code>[&#39;a, &#39;b: &#39;a, T, U: &#39;a + Copy,]</code>.</p></li>
+<li><p><code>$params</code>: a <code>[ .. ]</code>-delimited, comma-terminated list of generic parameter names.  <em>e.g.</em> <code>[&#39;a, &#39;b, T, U,]</code>.</p></li>
+<li><p><code>$ltimes</code>: a <code>[ .. ]</code>-delimited, comma-terminated list of generic lifetime parameters.  <em>e.g.</em> <code>[&#39;a, &#39;b,]</code>.</p></li>
+<li><p><code>$tnames</code>: a <code>[ .. ]</code>-delimited, comma-terminated list of generic type parameters.  <em>e.g.</em> <code>[T, U,]</code>.</p></li>
+</ul></li>
+<li><p><code>$where_</code>: the <code>{ .. }</code>-delimited output of <code>parse_where_shim!</code> for the <code>struct</code>, containing the <code>preds</code> field:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='kw'>where</span>: {
+    <span class='ident'>preds</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>preds</span>,
+}</pre>
+
+<ul>
+<li><code>$preds</code>: a <code>[ .. ]</code>-delimited, comma-separated list of clause predicates.  <em>e.g.</em> <code>[ for&lt;&#39;a&gt; T: Fn(&amp;&#39;a i32), ]</code>.</li>
+</ul></li>
+<li><p><code>$kind</code>: one of <code>unitary</code>, <code>tuple</code>, or <code>record</code>.  These correspond to the three kinds of <code>struct</code> definitions: <code>struct Unitary;</code>, <code>struct Tuple(..);</code> and <code>struct Record { .. }</code>.</p></li>
+<li><p><code>$fields</code>: a <code>[ .. ]</code>-delimited, comma-terminated list of fields (described below).</p></li>
+<li><p><code>$num_fields</code>: the number of fields in the <code>struct</code>.  <em>e.g.</em> <code>2</code>.</p></li>
+</ul>
+
+<p><code>struct</code> fields have the following form:</p>
+
+<pre class='rust rust-example-rendered'>
+{
+    <span class='ident'>ord</span>: (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ford_index</span>:<span class='ident'>tt</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>ford_ident</span>:<span class='ident'>ident</span>),
+    <span class='ident'>attrs</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fattrs</span>:<span class='ident'>tt</span>,
+    <span class='ident'>vis</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fvis</span>:<span class='ident'>tt</span>,
+    <span class='ident'>ty</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fty</span>:<span class='ident'>ty</span>,
+
+    <span class='comment'>// **NOTE**: only exists for *record* `struct` fields:</span>
+    <span class='ident'>name</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>fname</span>:<span class='ident'>ident</span>,
+}</pre>
+
+<ul>
+<li><p><code>$ford_index</code>: the 0-based ordinal for this <code>struct</code> field.  <em>e.g.</em> <code>1</code>.</p></li>
+<li><p><code>$ford_ident</code>: an identifier guaranteed to be unique relative to other fields <em>for the same <code>struct</code></em>.  Identifiers are <em>not</em> guaranteed to be unique between different <code>parse_struct!</code> invocations.  <em>e.g.</em> <code>_ord_01</code>.</p></li>
+<li><p><code>$fattrs</code>: a <code>[ .. ]</code>-delimited list of attributes attached to the <code>struct</code> field.  <em>e.g.</em> <code>[ #[doc=&quot;The amount of green-ness.&quot;] ]</code>.</p></li>
+<li><p><code>$fvis</code>: a <code>( .. )</code>-delimited visibility annotation.  <em>e.g.</em>: <code>()</code>, <code>(pub)</code>.</p></li>
+<li><p><code>$fty</code>: the type of the <code>struct</code> field.</p></li>
+<li><p><code>$fname</code>: the <code>struct</code> field&#39;s name as an identifier.  <em>e.g.</em> <code>green</code>.</p></li>
+</ul>
+
+<h3 id='example-1' class='section-header'><a href='#example-1'>Example</a></h3>
+<pre class='rust rust-example-rendered'>
+<span class='macro'>parse_struct</span><span class='macro'>!</span> {
+    <span class='ident'>then</span> <span class='macro'>stringify</span><span class='macro'>!</span>(<span class='ident'>output</span>:),
+    <span class='doccomment'>/// Represents a colour.</span>
+    <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Rgb</span><span class='op'>&lt;</span><span class='ident'>Ch</span><span class='op'>&gt;</span> {
+        <span class='doccomment'>/// The degree of red-ness.</span>
+        <span class='ident'>r</span>: <span class='ident'>Ch</span>,
+        <span class='doccomment'>/// How eco-friendly is this colour?</span>
+        <span class='ident'>g</span>: <span class='ident'>Ch</span>,
+        <span class='doccomment'>/// Maybe it&#39;s blue, maybe it&#39;s not?</span>
+        <span class='ident'>b</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ch</span><span class='op'>&gt;</span>,
+    }
+}
+
+<span class='comment'>// Expands to:</span>
+<span class='macro'>stringify</span><span class='macro'>!</span>(
+    <span class='ident'>output</span>:
+    <span class='kw'>struct</span> {
+        <span class='ident'>attrs</span>: [ <span class='attribute'>#[<span class='ident'>doc</span><span class='op'>=</span><span class='string'>r&quot;Represents a colour.&quot;</span>]</span> ],
+        <span class='ident'>vis</span>: (<span class='kw'>pub</span>),
+        <span class='ident'>name</span>: <span class='ident'>Rgb</span>,
+        <span class='ident'>generics</span>: {
+            <span class='ident'>constr</span>: [<span class='ident'>Ch</span>,],
+            <span class='ident'>params</span>: [<span class='ident'>Ch</span>,],
+            <span class='ident'>ltimes</span>: [],
+            <span class='ident'>tnames</span>: [<span class='ident'>Ch</span>,],
+        },
+        <span class='kw'>where</span>: {
+            <span class='ident'>clause</span>: [],
+            <span class='ident'>preds</span>: [],
+        },
+        <span class='ident'>kind</span>: <span class='ident'>record</span>,
+        <span class='ident'>fields</span>: [
+            {
+                <span class='ident'>ord</span>: (<span class='number'>0</span>, <span class='ident'>_ord_00</span>),
+                <span class='ident'>attrs</span>: [ <span class='attribute'>#[<span class='ident'>doc</span><span class='op'>=</span><span class='string'>r&quot;The degree of red-ness.&quot;</span>]</span> ],
+                <span class='ident'>vis</span>: (),
+                <span class='ident'>ty</span>: <span class='ident'>Ch</span>,
+                <span class='ident'>name</span>: <span class='ident'>r</span>,
+            },
+            {
+                <span class='ident'>ord</span>: (<span class='number'>1</span>, <span class='ident'>_ord_01</span>),
+                <span class='ident'>attrs</span>: [ <span class='attribute'>#[<span class='ident'>doc</span><span class='op'>=</span><span class='string'>r&quot;How eco-friendly is this colour?&quot;</span>]</span> ],
+                <span class='ident'>vis</span>: (),
+                <span class='ident'>ty</span>: <span class='ident'>Ch</span>,
+                <span class='ident'>name</span>: <span class='ident'>g</span>,
+            },
+            {
+                <span class='ident'>ord</span>: (<span class='number'>2</span>, <span class='ident'>_ord_02</span>),
+                <span class='ident'>attrs</span>: [ <span class='attribute'>#[<span class='ident'>doc</span><span class='op'>=</span><span class='string'>r&quot;Maybe it&#39;s blue, maybe it&#39;s not?&quot;</span>]</span> ],
+                <span class='ident'>vis</span>: (),
+                <span class='ident'>ty</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ch</span><span class='op'>&gt;</span>,
+                <span class='ident'>name</span>: <span class='ident'>b</span>,
+            },
+        ],
+        <span class='ident'>num_fields</span>: <span class='number'>3</span>,
+    }
+)</pre>
+
+<h2 id='using-parse-macros' class='section-header'><a href='#using-parse-macros'>Using <code>parse-macros</code></a></h2>
+<h3 id='for-crate-authors' class='section-header'><a href='#for-crate-authors'>For Crate Authors</a></h3>
+<p>Add the following to your <code>Cargo.toml</code> manifest:</p>
+
+<pre><code class="language-toml">[features]
+use-parse-generics-poc = [
+    &quot;parse-generics-poc&quot;,
+    &quot;parse-macros/use-parse-generics-poc&quot;,
+]
+
+[dependencies]
+parse-generics-poc = { version = &quot;0.1.0&quot;, optional = true }
+parse-macros = &quot;0.1.0&quot;
+</code></pre>
+
+<p>This allows your users to enable the proof-of-concept compiler plugin <em>through</em> your crate.  You should also copy and modify the following section (replacing <code>whizzo</code> with your crate&#39;s name).</p>
+
+<h3 id='for-crate-users' class='section-header'><a href='#for-crate-users'>For Crate Users</a></h3>
+<p>Add the following to your <code>Cargo.toml</code> manifest:</p>
+
+<pre><code class="language-toml">[features]
+use-parse-generics-poc = [
+    &quot;whizzo/use-parse-generics-poc&quot;,
+    &quot;parse-generics-poc&quot;,
+    &quot;parse-macros/use-parse-generics-poc&quot;,
+]
+
+[dependencies]
+whizzo = &quot;0.1.0&quot;
+parse-generics-poc = { version = &quot;0.1.0&quot;, optional = true }
+parse-generics-shim = &quot;0.1.0&quot;
+parse-macros = &quot;0.1.0&quot;
+</code></pre>
+
+<p>Then, add the following to your crate&#39;s root module:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span><span class='op'>=</span><span class='string'>&quot;parse-generics-poc&quot;</span>, <span class='ident'>feature</span>(<span class='ident'>plugin</span>))]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span><span class='op'>=</span><span class='string'>&quot;parse-generics-poc&quot;</span>, <span class='ident'>plugin</span>(<span class='ident'>parse_generics_poc</span>))]</span>
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>parse_generics_shim</span>;
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>parse_macros</span>;
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>whizzo</span>;</pre>
+
+<p>By default, this will use stable-but-inferior implementations of the generics-parsing macros.  In particular, you cannot use lifetimes other than <code>&#39;a</code> through <code>&#39;z</code>, and macros may fail to expand for sufficiently complex inputs.</p>
+
+<p>If a macro fails to expand due to the &quot;recursion limit&quot;, place the following attribute at the top of your crate&#39;s root module, and raise the number until the macro works:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>recursion_limit</span><span class='op'>=</span><span class='string'>&quot;32&quot;</span>]</span></pre>
+
+<p>If you are using a compatible nightly compiler, you can enable the fully-featured versions of the generics-parsing macros (see the proposed <a href="https://github.com/rust-lang/rfcs/pull/1583">RFC #1583</a> for context).  If you have followed the instructions above, this can be done by adding <code>--features=use-parse-generic-poc</code> to your <code>cargo build</code> command.</p>
+
+<p>The <a href="https://danielkeep.github.io/rust-parse-generics/doc/parse_generics_poc/index.html">documentation for <code>parse-generics-poc</code></a> will specify <em>which</em> nightly it is known to be compatible with.  If you are using <code>rustup</code>, you can configure your crate to use the appropriate compiler using the following (replacing the date shown with the one listed in the <code>parse-generics-poc</code> documentation):</p>
+
+<pre><code class="language-sh">rustup override add nightly-2016-04-06
+</code></pre>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "parse_macros";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

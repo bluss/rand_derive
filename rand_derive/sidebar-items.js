@@ -1,0 +1,1 @@
+initSidebarItems({"macro":[["Rand","Implementation of `derive(Rand)` for `custom_derive!{}`."]]});
