@@ -5,7 +5,7 @@ authors = ["bluss"]
 license = "MIT/Apache-2.0"
 description = "Implementation of `derive(Rand)` for `custom_derive!{}`. Produces an implementation of `rand::Rand` automatically for enums and structs."
 repository = "https://github.com/bluss/rand_derive"
-documentation = "https://bluss.github.io/rand_derive"
+documentation = "https://docs.rs/rand_derive/"
 keywords = ["rand", "derive", "macro"]
 
 [dependencies]
