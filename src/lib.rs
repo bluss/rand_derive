@@ -6,9 +6,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! Implementation of `derive(Rand)` for `custom_derive!{}`.
+//! Implementation of `derive(Rand!)` for `macro_attr!{}`.
 //!
-//! This crate defines a macro `Rand!{}` that can be used through `custom_derive!{}`
+//! This crate defines a macro `Rand!{}` that can be used through `macro_attr!{}`
 //! to derive an implementation of the `Rand` trait (crate rand version 0.3.x).
 //!
 //! Using this macro also depends on crates `parse_macros` and `parse_generics_shim`,
@@ -21,12 +21,12 @@
 //!
 //! #[macro_use] extern crate parse_macros;
 //! #[macro_use] extern crate parse_generics_shim;
-//! #[macro_use] extern crate custom_derive;
+//! #[macro_use] extern crate macro_attr;
 //!
 //! #[macro_use] extern crate rand_derive;
 //!
-//! custom_derive! {
-//!     #[derive(Rand, Debug)]
+//! macro_attr! {
+//!     #[derive(Rand!, Debug)]
 //!     enum TestEnum {
 //!         A,
 //!         B,
@@ -34,8 +34,8 @@
 //!     }
 //! }
 //!
-//! custom_derive! {
-//!     #[derive(Rand, Debug)]
+//! macro_attr! {
+//!     #[derive(Rand!, Debug)]
 //!     struct Point<T> {
 //!         x: T,
 //!         y: T,
@@ -66,11 +66,11 @@
 #[cfg(test)]
 #[macro_use] extern crate parse_generics_shim;
 #[cfg(test)]
-#[macro_use] extern crate custom_derive;
+#[macro_use] extern crate macro_attr;
 #[cfg(test)]
 extern crate rand;
 
-/// Implementation of `derive(Rand)` for `custom_derive!{}`.
+/// Implementation of `derive(Rand!)` for `macro_attr!{}`.
 #[macro_export]
 macro_rules! Rand {
     (
@@ -220,29 +220,29 @@ macro_rules! Rand {
 mod tests {
     //trace_macros!(true);
     use rand::random;
-    custom_derive! {
-        #[derive(Rand, Debug)]
+    macro_attr! {
+        #[derive(Rand!, Debug)]
         enum Test {
             A, B, C,
         }
     }
     /*
        // Does not compile with 0 variants
-    custom_derive! {
-        #[derive(Rand, Debug)]
+    macro_attr! {
+        #[derive(Rand!, Debug)]
         pub enum Test2 {
         }
     }
     */
 
-    custom_derive! {
-        #[derive(Rand, Debug)]
+    macro_attr! {
+        #[derive(Rand!, Debug)]
         enum Test1 {
             A,
         }
     }
-    custom_derive! {
-        #[derive(Rand, Debug)]
+    macro_attr! {
+        #[derive(Rand!, Debug)]
         enum Test2 {
             A,
             B,
@@ -259,8 +259,8 @@ mod tests {
         println!("{:?}", t2);
     }
 
-    custom_derive! {
-        #[derive(Rand, Debug)]
+    macro_attr! {
+        #[derive(Rand!, Debug)]
         enum Test3 {
             A(i8),
             B(Test2),
@@ -272,16 +272,16 @@ mod tests {
         println!("{:?}", t);
     }
 
-    custom_derive! {
-        #[derive(Rand, Debug)]
+    macro_attr! {
+        #[derive(Rand!, Debug)]
         enum TestS {
             A { x: u8, y: u8 },
             B { x: u8, y: u8, z: u8 },
             C { },
         }
     }
-    custom_derive! {
-        #[derive(Rand, Debug)]
+    macro_attr! {
+        #[derive(Rand!, Debug)]
         enum TestS2 {
             A { },
         }
@@ -294,16 +294,16 @@ mod tests {
         println!("{:?}", s);
     }
 
-    custom_derive! {
-        #[derive(Rand, Debug)]
+    macro_attr! {
+        #[derive(Rand!, Debug)]
         enum TestGeneric1<T> where T: ::rand::Rand {
             A { x: T },
             B { x: u8, y: u8, z: u8 },
         }
     }
 
-    custom_derive! {
-        #[derive(Rand, Debug)]
+    macro_attr! {
+        #[derive(Rand!, Debug)]
         enum TestGeneric2<T> {
             A { x: T },
             B { x: u8, y: u8, z: u8 },
@@ -318,34 +318,34 @@ mod tests {
         println!("{:?}", s);
     }
 
-    custom_derive! {
-        #[derive(Rand, Debug)]
+    macro_attr! {
+        #[derive(Rand!, Debug)]
         struct TestStruct;
     }
 
-    custom_derive! {
-        #[derive(Rand, Debug)]
+    macro_attr! {
+        #[derive(Rand!, Debug)]
         struct TestStruct2 {
             x: u8,
             y: (),
         }
     }
 
-    custom_derive! {
-        #[derive(Rand, Debug)]
+    macro_attr! {
+        #[derive(Rand!, Debug)]
         struct TestStruct3(u8, Test1);
     }
 
-    custom_derive! {
-        #[derive(Rand, Debug)]
+    macro_attr! {
+        #[derive(Rand!, Debug)]
         struct TestStruct4<T, U> where T: 'static {
             x: T,
             y: U,
         }
     }
 
-    custom_derive! {
-        #[derive(Rand, Debug)]
+    macro_attr! {
+        #[derive(Rand!, Debug)]
         struct TestStruct5 {}
     }
 
@@ -364,8 +364,8 @@ mod tests {
         println!("{:?}", w);
     }
 
-    custom_derive! {
-        #[derive(Rand, Debug)]
+    macro_attr! {
+        #[derive(Rand!, Debug)]
         struct BigStruct<T> {
             a: T,
             b: (),
