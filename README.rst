@@ -17,6 +17,14 @@ __ https://docs.rs/rand_derive/
 Recent Changes
 --------------
 
+- 0.2.0
+
+  - Updated to use ``macro-attr`` which is the successor of the “``custom_derive``”
+    crate. New syntax is to use ``macro_attr! { }`` around the struct or enum,
+    and ``#[derive(Rand!)]`` with exclamation mark for the deriving attr.
+
+- 0.1.0
+
 License
 -------
 
